@@ -25,7 +25,7 @@ public class Config
 
     private static final List<Integer> default_weather_times = List.of(20, 16000);
 
-    private static Predicate<Object> validator = o -> o instanceof Integer && (((Integer) o).intValue() >= MIN_DAYTIME && ((Integer) o).intValue() <= MAX_DAYTIME);
+    private static final Predicate<Object> validator = o -> o instanceof Integer && ((Integer) o >= MIN_DAYTIME && (Integer) o <= MAX_DAYTIME);
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WEATHER_TIMES = BUILDER
             .defineList("weatherTimes", default_weather_times, validator);
