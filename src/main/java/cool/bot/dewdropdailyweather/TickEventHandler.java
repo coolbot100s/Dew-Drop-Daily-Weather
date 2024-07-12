@@ -3,18 +3,15 @@ package cool.bot.dewdropdailyweather;
 import net.minecraft.server.level.ServerLevel;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Random;
-
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.List;
 
+import static cool.bot.botslib.util.RNG.irandRange;
+import static cool.bot.botslib.util.RNG.weightedChoice;
+
 public class TickEventHandler {
-
-
-
-
 
     public static List<WeatherEvent> schedule = updateSchedule();
 
@@ -38,9 +35,6 @@ public class TickEventHandler {
         List<List<String>> pools = List.copyOf(Config.weatherOptions);
 
         int events = times.size();
-
-
-        //DewDropDailyWeather.LOGGER.info(times.toString());
 
         ArrayList<WeatherEvent> trueSchedule = new ArrayList<>(List.of());
 
@@ -76,7 +70,6 @@ public class TickEventHandler {
             }
 
             int dayTime = (int) level.getDayTime() % 24000;
-            //DewDropDailyWeather.LOGGER.info("Day Time: {}", dayTime);
 
             if (dayTime == 1) {
                 schedule = updateSchedule();
@@ -85,7 +78,8 @@ public class TickEventHandler {
                 }
             } else if (schedule.stream().anyMatch(weatherEvent -> weatherEvent.getTime() == dayTime)) {
                 String weatherType = schedule.stream().filter(weatherEvent -> weatherEvent.getTime() == dayTime).findFirst().get().getWeather();
-                DewDropDailyWeather.LOGGER.info("Current Weather: {}", weatherType);
+
+                if(Config.logSchedule) DewDropDailyWeather.LOGGER.info("Current Weather: {}", weatherType);
 
                 switch (weatherType) {
                     case "clear":
@@ -114,42 +108,5 @@ public class TickEventHandler {
             DewDropDailyWeather.LOGGER.info("{}: {}", event.getTime(), event.getWeather());
         }
     }
-
-
-    // ADD TO LIB
-    public static int irandRange(int min, int max) {
-        return new Random().nextInt(max - min + 1) + min;
-    }
-
-    public static <T> T weightedChoice(List<T> options, List<Integer> weights) {
-        Random random = new Random();
-
-        //DewDropDailyWeather.LOGGER.info(String.valueOf(options));
-
-        if (options.size() != weights.size()) {
-            throw new IllegalArgumentException("Options and weights must have the same size");
-        }
-
-        int totalWeight = 0;
-        for (int weight : weights) {
-            totalWeight += weight;
-        }
-
-        int randomWeight = random.nextInt(totalWeight);
-
-        int currentWeight = 0;
-        for (int i = 0; i < options.size(); i++) {
-            currentWeight += weights.get(i);
-            if (randomWeight < currentWeight) {
-                return options.get(i);
-            }
-        }
-
-        return options.get(0); // should never reach here
-    }
-
-
-
-
 
 }
