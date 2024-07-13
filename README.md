@@ -8,7 +8,7 @@ You can also allow for RNG to decide what the weather should be while staying in
 By default, the weather event for the day (clear, raining, or storming), will be decided at the beginning of each Minecraft day, with a 60% chance for clear weather, 20% chance for rain, and 10% chance for a storm.  
 The weather will remain the same all day long, with a small chance to change during the nighttime.
 
-This mod was designed for the Dew Drop project, you should check it out!
+This mod was designed for the [Dew Drop](https://modrinth.com/collection/1jZQOrlw) project, you should check it out!
 
 ## Project Links
 
