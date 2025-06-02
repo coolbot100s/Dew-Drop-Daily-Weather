@@ -109,6 +109,9 @@ public class TickEventHandler {
 
             // If weather cycle or daylight is off, do nothing
             if (!(level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT))) {
+                if (Config.logSchedule) {
+                    DewDropDailyWeather.LOGGER.info("Weather cycle or daylight is off, no forecast generated.");
+                }
                 return;
             }
 
