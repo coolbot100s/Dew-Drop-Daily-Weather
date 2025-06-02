@@ -1,11 +1,9 @@
-
 plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
-
 
 group = mod_group_id
 version = mod_version
@@ -136,7 +134,8 @@ dependencies {
 
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    minecraftLibrary fg.deobf("maven.modrinth:bots-lib:3.3")
+    // BotsLib 4.1
+    minecraftLibrary fg.deobf("maven.modrinth:bots-lib:4.1")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

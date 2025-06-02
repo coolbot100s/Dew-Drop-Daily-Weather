@@ -5,6 +5,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
+import cool.bot.botslib.util.Compatibility;
+
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -111,18 +113,145 @@ public class Config
             .define("logSchedule", false);
 
 
+    // Seasons compat
+    public static boolean enableSeasons;
+
+    public static final ForgeConfigSpec.BooleanValue ENABLE_SEASONS = BUILDER
+            .comment("If Serene Seasons is present, you can enable this to use an alternative set of lists for each season, these options work the same as the ones listed above and have identical default values.")
+            .define("enableSeasons", false);
+
+    // Spring
+    public static List<Integer> weatherTimesSpring;
+    public static List<List<Integer>> weatherRangesSpring;
+    public static List<List<String>> weatherOptionsSpring;
+    public static List<List<Integer>> weatherWeightsSpring;
+
+    // Summer
+    public static List<Integer> weatherTimesSummer;
+    public static List<List<Integer>> weatherRangesSummer;
+    public static List<List<String>> weatherOptionsSummer;
+    public static List<List<Integer>> weatherWeightsSummer;
+
+    // Fall
+    public static List<Integer> weatherTimesFall;
+    public static List<List<Integer>> weatherRangesFall;
+    public static List<List<String>> weatherOptionsFall;
+    public static List<List<Integer>> weatherWeightsFall;
+
+    // Winter
+    public static List<Integer> weatherTimesWinter;
+    public static List<List<Integer>> weatherRangesWinter;
+    public static List<List<String>> weatherOptionsWinter;
+    public static List<List<Integer>> weatherWeightsWinter;
+
+    // Spring
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WEATHER_TIMES_SPRING = BUILDER
+            .comment("Spring weather times")
+            .defineList("weatherTimesSpring", defaultWeatherTimes, daytimeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_RANGES_SPRING = BUILDER
+            .comment("Spring weather ranges")
+            .defineListAllowEmpty("weatherRangesSpring", defaultWeatherRanges, weatherRangeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends String>>> WEATHER_OPTIONS_SPRING = BUILDER
+            .comment("Spring weather options")
+            .defineList("weatherOptionsSpring", List.of(List.of("clear", "rain", "storm"), List.of("ignore", "clear", "rain", "storm")), weatherOptionValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_WEIGHTS_SPRING = BUILDER
+            .comment("Spring weather weights")
+            .defineList("weatherWeightsSpring", List.of(List.of(7, 2, 1),List.of(7,1,1,1)), weatherWeightsValidator);
+
+    // Summer
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WEATHER_TIMES_SUMMER = BUILDER
+            .comment("Summer weather times")
+            .defineList("weatherTimesSummer", defaultWeatherTimes, daytimeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_RANGES_SUMMER = BUILDER
+            .comment("Summer weather ranges")
+            .defineListAllowEmpty("weatherRangesSummer", defaultWeatherRanges, weatherRangeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends String>>> WEATHER_OPTIONS_SUMMER = BUILDER
+            .comment("Summer weather options")
+            .defineList("weatherOptionsSummer", List.of(List.of("clear", "rain", "storm"), List.of("ignore", "clear", "rain", "storm")), weatherOptionValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_WEIGHTS_SUMMER = BUILDER
+            .comment("Summer weather weights")
+            .defineList("weatherWeightsSummer", List.of(List.of(7, 2, 1),List.of(7,1,1,1)), weatherWeightsValidator);
+
+    // Fall
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WEATHER_TIMES_FALL = BUILDER
+            .comment("Fall weather times")
+            .defineList("weatherTimesFall", defaultWeatherTimes, daytimeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_RANGES_FALL = BUILDER
+            .comment("Fall weather ranges")
+            .defineListAllowEmpty("weatherRangesFall", defaultWeatherRanges, weatherRangeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends String>>> WEATHER_OPTIONS_FALL = BUILDER
+            .comment("Fall weather options")
+            .defineList("weatherOptionsFall", List.of(List.of("clear", "rain", "storm"), List.of("ignore", "clear", "rain", "storm")), weatherOptionValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_WEIGHTS_FALL = BUILDER
+            .comment("Fall weather weights")
+            .defineList("weatherWeightsFall", List.of(List.of(7, 2, 1),List.of(7,1,1,1)), weatherWeightsValidator);
+
+    // Winter
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WEATHER_TIMES_WINTER = BUILDER
+            .comment("Winter weather times")
+            .defineList("weatherTimesWinter", defaultWeatherTimes, daytimeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_RANGES_WINTER = BUILDER
+            .comment("Winter weather ranges")
+            .defineListAllowEmpty("weatherRangesWinter", defaultWeatherRanges, weatherRangeValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends String>>> WEATHER_OPTIONS_WINTER = BUILDER
+            .comment("Winter weather options")
+            .defineList("weatherOptionsWinter", List.of(List.of("clear", "rain", "storm"), List.of("ignore", "clear", "rain", "storm")), weatherOptionValidator);
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<? extends Integer>>> WEATHER_WEIGHTS_WINTER = BUILDER
+            .comment("Winter weather weights")
+            .defineList("weatherWeightsWinter", List.of(List.of(7, 2, 1),List.of(7,1,1,1)), weatherWeightsValidator);
+
+
     // This stays at the bottom!
     static final ForgeConfigSpec SERVER_CONFIG = BUILDER.build();
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
+        // Load non-seasonal values
         weatherTimes = (List<Integer>) WEATHER_TIMES.get();
         weatherRanges = (List<List<Integer>>) WEATHER_RANGES.get();
         weatherOptions = (List<List<String>>) WEATHER_OPTIONS.get();
         weatherWeights = (List<List<Integer>>) WEATHER_WEIGHTS.get();
         logSchedule = LOG_SCHEDULE.get();
+        enableSeasons = ENABLE_SEASONS.get();
 
+        // Load seasonal values
+        // Spring
+        weatherTimesSpring = (List<Integer>) WEATHER_TIMES_SPRING.get();
+        weatherRangesSpring = (List<List<Integer>>) WEATHER_RANGES_SPRING.get();
+        weatherOptionsSpring = (List<List<String>>) WEATHER_OPTIONS_SPRING.get();
+        weatherWeightsSpring = (List<List<Integer>>) WEATHER_WEIGHTS_SPRING.get();
 
+        // Summer
+        weatherTimesSummer = (List<Integer>) WEATHER_TIMES_SUMMER.get();
+        weatherRangesSummer = (List<List<Integer>>) WEATHER_RANGES_SUMMER.get();
+        weatherOptionsSummer = (List<List<String>>) WEATHER_OPTIONS_SUMMER.get();
+        weatherWeightsSummer = (List<List<Integer>>) WEATHER_WEIGHTS_SUMMER.get();
+
+        // Fall
+        weatherTimesFall = (List<Integer>) WEATHER_TIMES_FALL.get();
+        weatherRangesFall = (List<List<Integer>>) WEATHER_RANGES_FALL.get();
+        weatherOptionsFall = (List<List<String>>) WEATHER_OPTIONS_FALL.get();
+        weatherWeightsFall = (List<List<Integer>>) WEATHER_WEIGHTS_FALL.get();
+
+        // Winter
+        weatherTimesWinter = (List<Integer>) WEATHER_TIMES_WINTER.get();
+        weatherRangesWinter = (List<List<Integer>>) WEATHER_RANGES_WINTER.get();
+        weatherOptionsWinter = (List<List<String>>) WEATHER_OPTIONS_WINTER.get();
+        weatherWeightsWinter = (List<List<Integer>>) WEATHER_WEIGHTS_WINTER.get();
+
+        DewDropDailyWeather.useSeasons = Config.enableSeasons && Compatibility.sereneSeasonsLoaded();
     }
 }

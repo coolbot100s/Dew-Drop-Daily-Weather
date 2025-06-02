@@ -27,6 +27,6 @@ logoFile="logo.png"
 [[dependencies."${mod_id}"]]
    modId="bots_lib"
    mandatory=true
-   versionRange="3.3"
+   versionRange=">=4.1"
    ordering="NONE"
    side="BOTH"

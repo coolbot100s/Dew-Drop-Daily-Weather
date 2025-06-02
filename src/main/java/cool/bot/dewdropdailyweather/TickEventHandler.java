@@ -10,11 +10,12 @@ import java.util.List;
 
 import static cool.bot.botslib.util.RNG.irandRange;
 import static cool.bot.botslib.util.RNG.weightedChoice;
+import static cool.bot.botslib.util.Seasons.getSeason;
+import static cool.bot.dewdropdailyweather.DewDropDailyWeather.useSeasons;
 
 public class TickEventHandler {
 
-    public static List<WeatherEvent> schedule = updateSchedule();
-
+    public static List<WeatherEvent> schedule = updateSchedule(null);
     public static class WeatherEvent {
         public int time;
         public String weather;
@@ -27,16 +28,58 @@ public class TickEventHandler {
 
     }
 
-    private static ArrayList<WeatherEvent> updateSchedule() {
-        List<Integer> times = new ArrayList<>(List.copyOf(Config.weatherTimes));
-        List<List<Integer>> timesRanges = List.copyOf(Config.weatherRanges);
+    private static ArrayList<WeatherEvent> updateSchedule(ServerLevel level) {
 
-        List<List<Integer>> weightss = List.copyOf(Config.weatherWeights);
-        List<List<String>> pools = List.copyOf(Config.weatherOptions);
+        List<Integer> times;
+        List<List<Integer>> timesRanges;
 
-        int events = times.size();
+        List<List<Integer>> weights;
+        List<List<String>> pools;
+
+        int events;
 
         ArrayList<WeatherEvent> trueSchedule = new ArrayList<>(List.of());
+
+        if (!useSeasons || level == null) {
+            times = new ArrayList<>(List.copyOf(Config.weatherTimes));
+            timesRanges = List.copyOf(Config.weatherRanges);
+            weights = List.copyOf(Config.weatherWeights);
+            pools = List.copyOf(Config.weatherOptions);
+        } else {
+            switch (getSeason(level))
+            {
+                case SPRING:
+                    times = new ArrayList<>(List.copyOf(Config.weatherTimesSpring));
+                    timesRanges = List.copyOf(Config.weatherRangesSpring);
+                    weights = List.copyOf(Config.weatherWeightsSpring);
+                    pools = List.copyOf(Config.weatherOptionsSpring);
+                    break;
+                case SUMMER:
+                    times = new ArrayList<>(List.copyOf(Config.weatherTimesSummer));
+                    timesRanges = List.copyOf(Config.weatherRangesSummer);
+                    weights = List.copyOf(Config.weatherWeightsSummer);
+                    pools = List.copyOf(Config.weatherOptionsSummer);
+                    break;
+                case FALL:
+                    times = new ArrayList<>(List.copyOf(Config.weatherTimesFall));
+                    timesRanges = List.copyOf(Config.weatherRangesFall);
+                    weights = List.copyOf(Config.weatherWeightsFall);
+                    pools = List.copyOf(Config.weatherOptionsFall);
+                    break;
+                case WINTER:
+                    times = new ArrayList<>(List.copyOf(Config.weatherTimesWinter));
+                    timesRanges = List.copyOf(Config.weatherRangesWinter);
+                    weights = List.copyOf(Config.weatherWeightsWinter);
+                    pools = List.copyOf(Config.weatherOptionsWinter);
+                    break;
+                default:
+                    times = new ArrayList<>(List.copyOf(Config.weatherTimes));
+                    timesRanges = List.copyOf(Config.weatherRanges);
+                    weights = List.copyOf(Config.weatherWeights);
+                    pools = List.copyOf(Config.weatherOptions);
+            }
+        }
+        events = times.size();
 
         for (int i = 0; i < events; i++) {
             if (!timesRanges.isEmpty()) {
@@ -44,7 +87,7 @@ public class TickEventHandler {
             }
 
             List<String> cpool = pools.get(i);
-            List<Integer> cweights = weightss.get(i);
+            List<Integer> cweights = weights.get(i);
 
 
             //Decide weather
@@ -72,9 +115,9 @@ public class TickEventHandler {
             int dayTime = (int) level.getDayTime() % 24000;
 
             if (dayTime == 1) {
-                schedule = updateSchedule();
+                schedule = updateSchedule(level);
                 if (Config.logSchedule) {
-                    logSchedule(schedule);
+                    logSchedule(schedule, level);
                 }
             } else if (schedule.stream().anyMatch(weatherEvent -> weatherEvent.getTime() == dayTime)) {
                 String weatherType = schedule.stream().filter(weatherEvent -> weatherEvent.getTime() == dayTime).findFirst().get().getWeather();
@@ -102,8 +145,11 @@ public class TickEventHandler {
 
     }
 
-    private static void logSchedule(List<WeatherEvent> schedule) {
+    private static void logSchedule(List<WeatherEvent> schedule, ServerLevel level) {
         DewDropDailyWeather.LOGGER.info("Today's Forecast:");
+        if (useSeasons) {
+            DewDropDailyWeather.LOGGER.info("Season: {}", getSeason(level));
+        }
         for (WeatherEvent event : schedule) {
             DewDropDailyWeather.LOGGER.info("{}: {}", event.getTime(), event.getWeather());
         }
