@@ -1,11 +1,12 @@
 package cool.bot.dewdropdailyweather;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameRules;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
 import java.util.ArrayList;
 import java.util.Comparator;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.List;
 
 import static cool.bot.botslib.util.RNG.irandRange;
@@ -41,42 +42,42 @@ public class TickEventHandler {
         ArrayList<WeatherEvent> trueSchedule = new ArrayList<>(List.of());
 
         if (!useSeasons || level == null) {
-            times = new ArrayList<>(List.copyOf(Config.weatherTimes));
-            timesRanges = List.copyOf(Config.weatherRanges);
-            weights = List.copyOf(Config.weatherWeights);
-            pools = List.copyOf(Config.weatherOptions);
+            times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimes.get()));
+            timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRanges.get());
+            weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeights.get());
+            pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptions.get());
         } else {
             switch (getSeason(level))
             {
                 case SPRING:
-                    times = new ArrayList<>(List.copyOf(Config.weatherTimesSpring));
-                    timesRanges = List.copyOf(Config.weatherRangesSpring);
-                    weights = List.copyOf(Config.weatherWeightsSpring);
-                    pools = List.copyOf(Config.weatherOptionsSpring);
+                    times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimesSpring.get()));
+                    timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRangesSpring.get());
+                    weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeightsSpring.get());
+                    pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptionsSpring.get());
                     break;
                 case SUMMER:
-                    times = new ArrayList<>(List.copyOf(Config.weatherTimesSummer));
-                    timesRanges = List.copyOf(Config.weatherRangesSummer);
-                    weights = List.copyOf(Config.weatherWeightsSummer);
-                    pools = List.copyOf(Config.weatherOptionsSummer);
+                    times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimesSummer.get()));
+                    timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRangesSummer.get());
+                    weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeightsSummer.get());
+                    pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptionsSummer.get());
                     break;
                 case FALL:
-                    times = new ArrayList<>(List.copyOf(Config.weatherTimesFall));
-                    timesRanges = List.copyOf(Config.weatherRangesFall);
-                    weights = List.copyOf(Config.weatherWeightsFall);
-                    pools = List.copyOf(Config.weatherOptionsFall);
+                    times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimesFall.get()));
+                    timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRangesFall.get());
+                    weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeightsFall.get());
+                    pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptionsFall.get());
                     break;
                 case WINTER:
-                    times = new ArrayList<>(List.copyOf(Config.weatherTimesWinter));
-                    timesRanges = List.copyOf(Config.weatherRangesWinter);
-                    weights = List.copyOf(Config.weatherWeightsWinter);
-                    pools = List.copyOf(Config.weatherOptionsWinter);
+                    times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimesWinter.get()));
+                    timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRangesWinter.get());
+                    weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeightsWinter.get());
+                    pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptionsWinter.get());
                     break;
                 default:
-                    times = new ArrayList<>(List.copyOf(Config.weatherTimes));
-                    timesRanges = List.copyOf(Config.weatherRanges);
-                    weights = List.copyOf(Config.weatherWeights);
-                    pools = List.copyOf(Config.weatherOptions);
+                    times = new ArrayList<>(List.copyOf(DewDropDailyWeather.CONFIG.weatherTimes.get()));
+                    timesRanges = List.copyOf(DewDropDailyWeather.CONFIG.weatherRanges.get());
+                    weights = List.copyOf(DewDropDailyWeather.CONFIG.weatherWeights.get());
+                    pools = List.copyOf(DewDropDailyWeather.CONFIG.weatherOptions.get());
             }
         }
         events = times.size();
@@ -103,13 +104,12 @@ public class TickEventHandler {
 
 
     @SubscribeEvent
-    public static void onTickEvent(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+    public static void onTickEvent(ServerTickEvent.Post event) {
             ServerLevel level = event.getServer().overworld();
 
             // If weather cycle or daylight is off, do nothing
             if (!(level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT))) {
-                if (Config.logSchedule) {
+                if (DewDropDailyWeather.CONFIG.logSchedule.get()) {
                     DewDropDailyWeather.LOGGER.info("Weather cycle or daylight is off, no forecast generated.");
                 }
                 return;
@@ -119,13 +119,13 @@ public class TickEventHandler {
 
             if (dayTime == 1) {
                 schedule = updateSchedule(level);
-                if (Config.logSchedule) {
+                if (DewDropDailyWeather.CONFIG.logSchedule.get()) {
                     logSchedule(schedule, level);
                 }
             } else if (schedule.stream().anyMatch(weatherEvent -> weatherEvent.getTime() == dayTime)) {
                 String weatherType = schedule.stream().filter(weatherEvent -> weatherEvent.getTime() == dayTime).findFirst().get().getWeather();
 
-                if(Config.logSchedule) DewDropDailyWeather.LOGGER.info("Current Weather: {}", weatherType);
+                if(DewDropDailyWeather.CONFIG.logSchedule.get()) DewDropDailyWeather.LOGGER.info("Current Weather: {}", weatherType);
 
                 switch (weatherType) {
                     case "clear":
@@ -144,7 +144,6 @@ public class TickEventHandler {
                 }
             }
 
-        }
 
     }
 
