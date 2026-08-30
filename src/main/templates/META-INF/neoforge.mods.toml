@@ -1,0 +1,31 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+displayURL="https://coolbot.carrd.co/"
+authors="${mod_authors}"
+description='''${mod_description}'''
+logoFile= "../../resources/logo.png"
+
+[[dependencies.${mod_id}]]
+  modId="neoforge"
+  type="required"
+  versionRange="[${neo_version},)"
+  ordering="NONE"
+  side="BOTH"
+[[dependencies."${mod_id}"]]
+  modId="minecraft"
+  mandatory=true
+  versionRange="${minecraft_version_range}"
+  ordering="NONE"
+  side="BOTH"
+[[dependencies."${mod_id}"]]
+  modId="bots_lib"
+  mandatory=true
+  versionRange=">=4.1"
+  ordering="NONE"
+  side="BOTH"
